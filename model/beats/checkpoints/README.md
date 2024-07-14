@@ -1,1 +1,1 @@
-Download and place pre-trained BEATS checkpoints here
+Download and place pre-trained BEATS [checkpoints](https://github.com/microsoft/unilm/tree/master/beats) here.
