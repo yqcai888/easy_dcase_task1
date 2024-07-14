@@ -4,7 +4,7 @@ Author: **Yiqiang Cai** (yiqiang.cai21@student.xjtlu.edu.cn), *Xi'an Jiaotong-Li
 
 ## Task Description
 
-The task 1 of DCASE Challenge is Acoustic Scene Classification with the focus on  For a detailed description of the challenge and this task visit the [DCASE website](https://dcase.community/challenge2024/). The main challenges of this task are summarized as below:
+The task 1 of DCASE Challenge focuses on Acoustic Scene Classification, recognizing the environment in which an audio recording was captured, such as streets, parks, or airports. For a detailed description of the challenge and this task visit the [DCASE website](https://dcase.community/challenge2024/). The main challenges of this task are summarized as below:
 1. Domain Shift: Unseen devices exist in test set. (2020~)
 2. Short Duration: The duration of audio recordings reduced from 10s (\~2021) to 1s (2022\~).
 3. Low Complexity: Limited model parameters (128K INT8) and computational overheads (30 MMACs). (2022~)
