@@ -4,20 +4,22 @@ from model.beats.BEATs import BEATsConfig, BEATs
 from model.classifiers import SingleLinearClassifier, ConvClassifier
 from model.shared import ConvBnRelu, ResNorm, AdaResNorm, BroadcastBlock, TimeFreqSepConvolutions
 
+class _BaseBackbone(nn.Module):
+    """ Base Module for backbones. """
 
-class DCASEBaselineCnn3(nn.Module):
+class DCASEBaselineCnn3(_BaseBackbone):
     """
     Previous baseline system of the task 1 of DCASE Challenge.
     A simple CNN consists of 3 conv layers and 2 linear layers.
 
-    Note: Kernel size of the Max-pooling layers need to be change for adapting to different size of inputs.
+    Note: Kernel size of the Max-pooling layers need to be changed for adapting to different size of inputs.
 
     Args:
-        in_channels (int): Number of input channels. (default: ``1``)
-        num_classes (int): Number of output classes. (default: ``10``)
-        base_channels (int): Number of base channels. (default: ``32``).
-        kernel_size (int): Kernel size of convolution layers. (default: ``7``).
-        dropout (float): Dropout rate. (default: ``0.3``).
+        in_channels (int): Number of input channels.
+        num_classes (int): Number of output classes.
+        base_channels (int): Number of base channels.
+        kernel_size (int): Kernel size of convolution layers.
+        dropout (float): Dropout rate.
     """
 
     def __init__(self, in_channels: int = 1, num_classes: int = 10, base_channels: int = 16, kernel_size: int = 7,
@@ -65,23 +67,24 @@ class DCASEBaselineCnn3(nn.Module):
         return x
 
 
-class BcResNet(nn.Module):
+class BCResNet(_BaseBackbone):
     """
     Implementation of BC-ResNet, based on Broadcasted Residual Learning.
     Check more details at: https://arxiv.org/abs/2106.04140
 
     Args:
-        in_channels (int): Number of input channels. (default: ``1``)
-        num_classes (int): Number of output classes. (default: ``10``)
-        base_channels (int): Number of base channels that controls the complexity of model. (default: ``40``)
-        kernel_size (int): Kernel size of each convolutional layer in BC blocks. (default: ``3``)
-        dropout (float): Dropout rate. (default: ``0.1``)
-        sub_bands (int): Number of sub-bands for SubSpectralNorm (SSN). ``1`` indicates SSN is not applied. (default: ``1``)
+        in_channels (int): Number of input channels.
+        num_classes (int): Number of output classes.
+        base_channels (int): Number of base channels that controls the complexity of model.
+        depth (int): Network depth with single option: 15.
+        kernel_size (int): Kernel size of each convolutional layer in BC blocks.
+        dropout (float): Dropout rate.
+        sub_bands (int): Number of sub-bands for SubSpectralNorm (SSN). ``1`` indicates SSN is not applied.
     """
 
     def __init__(self, in_channels: int = 1, num_classes: int = 10, base_channels: int = 40, depth: int = 15,
                  kernel_size: int = 3, dropout: float = 0.1, sub_bands: int = 1):
-        super(BcResNet, self).__init__()
+        super(BCResNet, self).__init__()
         self.kernel_size = kernel_size
         self.dropout = dropout
         self.sub_bands = sub_bands
@@ -121,18 +124,19 @@ class BcResNet(nn.Module):
         return x
 
 
-class TFSepNet(nn.Module):
+class TFSepNet(_BaseBackbone):
     """
     Implementation of TF-SepNet-64, based on Time-Frequency Separate Convolutions. Check more details at:
     https://ieeexplore.ieee.org/abstract/document/10447999 and
     https://dcase.community/documents/challenge2024/technical_reports/DCASE2024_Cai_61_t1.pdf
 
     Args:
-        in_channels (int): Number of input channels. (default: ``1``)
-        num_classes (int): Number of output classes. (default: ``10``)
-        base_channels (int): Number of base channels that controls the complexity of model. (default: ``64``)
-        kernel_size (int): Kernel size of each convolutional layer in TF-SepConvs blocks. (default: ``3``)
-        dropout (float): Dropout rate. (default: ``0.1``)
+        in_channels (int): Number of input channels.
+        num_classes (int): Number of output classes.
+        base_channels (int): Number of base channels that controls the complexity of model.
+        depth (int): Network depth with two options: 16 or 17. When depth = 17, an additional Max-pooling layer is inserted before the last TF-SepConvs black.
+        kernel_size (int): Kernel size of each convolutional layer in TF-SepConvs blocks.
+        dropout (float): Dropout rate.
     """
 
     def __init__(self, in_channels: int = 1, num_classes: int = 10, base_channels: int = 64, depth: int = 17,
@@ -181,7 +185,7 @@ class TFSepNet(nn.Module):
         return x
 
 
-class PretrainedBEATs(nn.Module):
+class PretrainedBEATs(_BaseBackbone):
     """
     Module wrapping a BEATs encoder with pretrained weights and a new linear classifier.
     Check more details at: https://arxiv.org/abs/2212.09058

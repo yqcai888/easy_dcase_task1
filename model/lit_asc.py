@@ -1,12 +1,12 @@
-from typing import Union
+from typing import Dict, Optional
 import torch
-import torch.nn as nn
 import torchinfo
 import lightning as L
 import torch.nn.functional as F
 from lightning.pytorch.cli import OptimizerCallable, LRSchedulerCallable
+from model.backbones import _BaseBackbone
 from util.lr_scheduler import exp_warmup_linear_down
-from util import ClassificationSummary
+from util import _SpecExtractor, ClassificationSummary, _DataAugmentation
 
 
 class LitAcousticSceneClassificationSystem(L.LightningModule):
@@ -16,20 +16,20 @@ class LitAcousticSceneClassificationSystem(L.LightningModule):
     Backbone architecture, system complexity, classification report and confusion matrix are shown at test stage.
 
     Args:
-        backbone (L.LightningModule, nn.Module): Deep neural network backbone, e.g. cnn, transformer...
-        data_augmentation (dict): A dictionary containing instances of data augmentation techniques (nn.Module), e.g. MixUp, MixStyle, DIR Augmentation, SpecAugmentation. Set each to ``None`` if not use one of them.
-        class_label (str): Class label. e.g. scene, device, city. (default:``scene``)
-        domain_label (str): Domain label. e.g. scene, device, city. (default:``device``)
-        spec_extractor (nn.Module): Spectrogram extractor used to transform 1D waveforms to 2D spectrogram. If ``None``, the input features should be 2D spectrogram.
+        backbone (_BaseBackbone): Deep neural network backbone, e.g. cnn, transformer...
+        data_augmentation (dict): A dictionary containing instances of data augmentation techniques in util/. Options: MixUp, FreqMixStyle, DeviceImpulseResponseAugmentation, SpecAugmentation. Set each to ``None`` if not use one of them.
+        class_label (str): Class label. e.g. scene, device, city.
+        domain_label (str): Domain label. e.g. scene, device, city.
+        spec_extractor (_SpecExtractor): Spectrogram extractor used to transform 1D waveforms to 2D spectrogram. If ``None``, the input features should be 2D spectrogram.
     """
 
     def __init__(self,
-                 backbone: Union[L.LightningModule, nn.Module],
-                 data_augmentation: dict,
+                 backbone: _BaseBackbone,
+                 data_augmentation: Dict[str, Optional[_DataAugmentation]],
                  class_label: str = "scene",
                  domain_label: str = "device",
-                 spec_extractor: nn.Module = None):
-        super().__init__()
+                 spec_extractor: _SpecExtractor = None):
+        super(LitAcousticSceneClassificationSystem, self).__init__()
         # Save the hyperparameters for Tensorboard visualization, 'backbone' and 'spec_extractor' are excluded.
         self.save_hyperparameters(ignore=['backbone', 'spec_extractor'])
         self.backbone = backbone
@@ -123,8 +123,8 @@ class LitAcousticSceneClassificationSystem(L.LightningModule):
     def on_test_epoch_end(self):
         tensorboard = self.logger.experiment
         # Summary the model profile
-        model = torch.nn.Sequential(self.backbone, self.cla_layer)
-        model_profile = torchinfo.summary(model, input_size=self._test_input_size)
+        print("\n Model Profile:")
+        model_profile = torchinfo.summary(self.backbone, input_size=self._test_input_size)
         macc = model_profile.total_mult_adds
         params = model_profile.total_params
         print('MACC:\t \t %.6f' % (macc / 1e6), 'M')
@@ -155,10 +155,10 @@ class LitAscWithKnowledgeDistillation(LitAcousticSceneClassificationSystem):
     Args:
         temperature (float): A higher temperature indicates a softer distribution of pseudo-probabilities.
         kd_lambda (float): Weight to control the balance between kl loss and label loss.
-        logits_index (int): Index of the logits in Dataset, as multiple logits may be used during training. (default: ``-1``)
+        logits_index (int): Index of the logits in Dataset, as multiple logits may be used during training.
     """
-    def __init__(self, temperature, kd_lambda, logits_index=-1, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, temperature: float, kd_lambda: float, logits_index: int = -1, **kwargs):
+        super(LitAscWithKnowledgeDistillation, self).__init__(**kwargs)
         self.temperature = temperature
         self.kd_lambda = kd_lambda
         self.logits_index = logits_index
@@ -208,10 +208,10 @@ class LitAscWithKnowledgeDistillation(LitAcousticSceneClassificationSystem):
 
 class LitAscWithWarmupLinearDownScheduler(LitAcousticSceneClassificationSystem):
     """
-    ASC system with warmup-linear-down scheduler. Adapted from: https://github.com/fschmid56/cpjku_dcase23/tree/main
+    ASC system with warmup-linear-down scheduler.
     """
     def __init__(self, optimizer: OptimizerCallable, warmup_len=4, down_len=26, min_lr=0.005, **kwargs):
-        super().__init__(**kwargs)
+        super(LitAscWithWarmupLinearDownScheduler, self).__init__(**kwargs)
         self.optimizer = optimizer
         self.warmup_len = warmup_len
         self.down_len = down_len
@@ -232,7 +232,7 @@ class LitAscWithTwoSchedulers(LitAcousticSceneClassificationSystem):
     For more details: https://lightning.ai/docs/pytorch/stable/cli/lightning_cli_advanced_3.html
     """
     def __init__(self, optimizer: OptimizerCallable, scheduler1: LRSchedulerCallable, scheduler2: LRSchedulerCallable, milestones, **kwargs):
-        super().__init__(**kwargs)
+        super(LitAscWithTwoSchedulers, self).__init__(**kwargs)
         self.optimizer = optimizer
         self.scheduler1 = scheduler1
         self.scheduler2 = scheduler2
@@ -254,7 +254,7 @@ class LitAscWithThreeSchedulers(LitAcousticSceneClassificationSystem):
     For more details: https://lightning.ai/docs/pytorch/stable/cli/lightning_cli_advanced_3.html
     """
     def __init__(self, optimizer: OptimizerCallable, scheduler1: LRSchedulerCallable, scheduler2: LRSchedulerCallable, scheduler3: LRSchedulerCallable, milestones, **kwargs):
-        super().__init__(**kwargs)
+        super(LitAscWithThreeSchedulers, self).__init__(**kwargs)
         self.optimizer = optimizer
         self.scheduler1 = scheduler1
         self.scheduler2 = scheduler2
