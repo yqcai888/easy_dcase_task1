@@ -1,0 +1,12 @@
+librosa
+pandas
+h5py
+numpy
+matplotlib
+tqdm
+lightning
+scikit-learn
+timm
+torchinfo
+"lightning[pytorch-extra]"
+neural-compressor

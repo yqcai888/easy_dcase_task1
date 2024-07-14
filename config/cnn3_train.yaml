@@ -1,0 +1,82 @@
+#### Train DCASE Baseline CNN3 ####
+
+trainer:
+  logger:
+      # Logger to save the logs, configs, hyperparameters and checkpoints
+      class_path: lightning.pytorch.loggers.TensorBoardLogger
+      init_args:
+        # Save path
+        save_dir: log
+        # Sub-path of the save path
+        name: cnn3_train
+  callbacks:
+      # Show epoch instead of step on tensor board
+    - class_path: util.OverrideEpochStepCallback
+      # Monitor learning rate on tensor board
+    - class_path: lightning.pytorch.callbacks.LearningRateMonitor
+      init_args:
+        logging_interval: epoch
+      # Stop training if `monitor` metric stop decreasing for `patience` epochs
+    - class_path: lightning.pytorch.callbacks.EarlyStopping
+      init_args:
+        monitor: val_loss
+        patience: 100
+      # Save the best model with the highest validation accuracy
+    - class_path: lightning.pytorch.callbacks.ModelCheckpoint
+      init_args:
+        save_top_k: 1
+        monitor: val_acc
+        mode: max
+        filename: '{epoch}-{val_acc:.4f}'
+  # Max training epochs
+  max_epochs: 200
+
+ckpt_path: null
+
+model:
+  class_path: model.lit_asc.LitAcousticSceneClassificationSystem
+  init_args:
+    backbone:
+      # A simple 3-layers CNN with 46K params and 29 MMACs
+      class_path: model.backbones.DCASEBaselineCnn3
+      init_args:
+        in_channels: 1
+        num_classes: 10
+        base_channels: 16
+        kernel_size: 7
+        dropout: 0.3
+    data_augmentation:
+      mix_up: null
+      mix_style: null
+      spec_aug: null
+      dir_aug: null
+    class_label: scene
+    domain_label: device
+    spec_extractor:
+      class_path: util.Cnn3Mel
+      init_args:
+        spectrogram_type: magnitude
+        hop_length_seconds: 0.02
+        win_length_seconds: 0.04
+        window_type: hamming_asymmetric
+        n_mels: 40
+        n_fft: 2048
+        fmin: 0
+        fmax: 22050
+        htk: false
+        normalize_mel_bands: false
+
+data:
+  # Wrapped data module of train, valid, test DataLoaders
+  class_path: data.data_module.DCASEDataModule
+  init_args:
+    meta_dir: data/meta_dcase_2024
+    audio_dir: ../TAU-urban-acoustic-scenes-2022-mobile-development/development
+    batch_size: 512
+    num_workers: 8
+    pin_memory: true
+    sampling_rate: 44100
+    train_subset: split5
+
+optimizer:
+  class_path: torch.optim.Adam

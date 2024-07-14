@@ -1,0 +1,99 @@
+### Train TF-SepNet (with knowledge distillation) ###
+
+trainer:
+  logger:
+      # Logger to save the logs, configs, hyperparameters and checkpoints
+      class_path: lightning.pytorch.loggers.TensorBoardLogger
+      init_args:
+        # Save path
+        save_dir: log
+        # Sub-path of the save path
+        name: tfsepnet_kd
+  callbacks:
+      # Show epoch instead of step on tensor board
+    - class_path: util.OverrideEpochStepCallback
+      # Monitor learning rate on tensor board
+    - class_path: lightning.pytorch.callbacks.LearningRateMonitor
+      init_args:
+        logging_interval: epoch
+#      # Stop training if `monitor` metric stop decreasing for `patience` epochs
+#    - class_path: lightning.pytorch.callbacks.EarlyStopping
+#      init_args:
+#        monitor: val_loss
+#        patience: 100
+      # Save the best model with highest validation accuracy
+    - class_path: lightning.pytorch.callbacks.ModelCheckpoint
+      init_args:
+        save_top_k: 1
+        monitor: val_acc
+        mode: max
+        filename: '{epoch}-{val_acc:.4f}'
+  # Max training epochs
+  max_epochs: 150
+
+ckpt_path: null
+
+model:
+  class_path: model.lit_asc.LitAscWithKnowledgeDistillation
+  init_args:
+    backbone:
+      class_path: model.backbones.TFSepNet
+      init_args:
+        in_channels: 1
+        num_classes: 10
+        base_channels: 64
+        depth: 17
+    # Set to ``null`` if not applied
+    data_augmentation:
+      mix_up:
+        class_path: util.SoftMixUp
+        init_args:
+          alpha: 0.3
+      mix_style:
+        class_path: util.FreqMixStyle
+        init_args:
+          alpha: 0.4
+          p: 0.8
+      spec_aug: null
+      dir_aug:
+        class_path: util.DeviceImpulseResponseAugmentation
+        init_args:
+          path_ir: ../microphone_impulse_response
+          p: 0.4
+    class_label: scene
+    domain_label: device
+    spec_extractor:
+      class_path: util.CpMel
+      init_args:
+        n_mels: 512
+    # Knowledge distillation hyperparameters
+    # Details: https://dcase.community/documents/challenge2023/technical_reports/DCASE2023_Schmid_28_t1.pdf
+    temperature: 2.0
+    kd_lambda: 0.02
+
+data:
+  # Wrapped data module of train, valid, test DataLoaders
+  class_path: data.data_module.DCASEDataModule
+  init_args:
+    meta_dir: data/meta_dcase_2024
+    audio_dir: ../TAU-urban-acoustic-scenes-2022-mobile-development/development
+    batch_size: 256
+    num_workers: 8
+    pin_memory: true
+    sampling_rate: 32000
+    train_subset: split5
+    # Path to teacher logits. If use more than one logit, the logits will be averaged as teacher ensemble.
+    logits_files:
+      - log/beats_freeze/version_*/predictions_split*.pt
+#      - log/beats_finetune/version_*/predictions_split*.pt
+#      - log/beats_finetune/version_*/predictions_split*.pt
+
+optimizer:
+  class_path: torch.optim.Adam
+  init_args:
+    lr: 0.004
+lr_scheduler:
+  class_path: torch.optim.lr_scheduler.CosineAnnealingWarmRestarts
+  init_args:
+    T_0: 10
+    T_mult: 2

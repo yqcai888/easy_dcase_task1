@@ -1,0 +1,47 @@
+#### Test the fine-tuned BEATs on test set ###
+# Normally only need to change `ckpt_path`
+
+trainer:
+  logger:
+      # Logger to save the logs, configs, hyperparameters and checkpoints
+      class_path: lightning.pytorch.loggers.TensorBoardLogger
+      init_args:
+        # Save path
+        save_dir: log
+        # Sub-path of the save path
+        name: beats_test
+
+# Path to the checkpoint of fine-tuned BEATs
+ckpt_path: log/beats_finetune/version_*/checkpoints/***.ckpt
+
+model:
+  class_path: model.lit_asc.LitAcousticSceneClassificationSystem
+  init_args:
+    backbone:
+      class_path: model.backbones.PretrainedBEATs
+      init_args:
+          pretrained: model/beats/checkpoints/BEATs_iter3_plus_AS2M.pt
+          num_classes: 10
+    data_augmentation:
+      mix_up: null
+      mix_style: null
+      mir_aug: null
+      spec_aug: null
+    class_label: scene
+    domain_label: device
+    spec_extractor:
+      class_path: util.BEATsMel
+      init_args:
+        dataset_mean: 15.41663
+        dataset_std: 6.55582
+
+data:
+  class_path: data.data_module.DCASEDataModule
+  init_args:
+    meta_dir: data/meta_dcase_2024
+    audio_dir: ../TAU-urban-acoustic-scenes-2022-mobile-development/development
+    batch_size: 128
+    num_workers: 8
+    pin_memory: true
+    sampling_rate: 16000
+    test_subset: test

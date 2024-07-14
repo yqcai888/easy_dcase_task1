@@ -1,0 +1,49 @@
+### Get the predictions of fine-tuned BEATs (as teacher soft labels for knowledge distillation) ###
+# Normally only need to change `output_dir`, `predict_subset`, `ckpt_path`
+
+trainer:
+  callbacks:
+      # Write predictions into the original log path
+    - class_path: util.PredictionWriter
+      init_args:
+        output_dir: log/beats_finetune/version_*
+        # Perform prediction on train or test subset
+        predict_subset: &predict_subset split5
+        write_interval: epoch
+
+# Path to the checkpoint of fine-tuned BEATs
+ckpt_path: log/beats_finetune/version_*/checkpoints/***.ckpt
+
+model:
+  class_path: model.lit_asc.LitAcousticSceneClassificationSystem
+  init_args:
+    backbone:
+      class_path: model.backbones.PretrainedBEATs
+      init_args:
+          pretrained: model/beats/checkpoints/BEATs_iter3_plus_AS2M.pt
+          num_classes: 10
+    data_augmentation:
+      mix_up: null
+      mix_style: null
+      mir_aug: null
+      spec_aug: null
+    class_label: scene
+    domain_label: device
+    spec_extractor:
+      class_path: util.BEATsMel
+      init_args:
+        dataset_mean: 15.41663
+        dataset_std: 6.55582
+
+data:
+  class_path: data.data_module.DCASEDataModule
+  init_args:
+    meta_dir: data/meta_dcase_2024
+    audio_dir: ../TAU-urban-acoustic-scenes-2022-mobile-development/development
+    batch_size: 128
+    num_workers: 4
+    pin_memory: true
+    sampling_rate: 16000
+    # Auto-align with the predict_subset declared above
+    predict_subset: *predict_subset
+

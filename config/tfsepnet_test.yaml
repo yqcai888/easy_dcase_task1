@@ -1,0 +1,48 @@
+### Test TF-SepNet on test set ###
+# Normally only need to change `ckpt_path`
+
+trainer:
+  logger:
+      # Logger to save the logs, configs, hyperparameters and checkpoints
+      class_path: lightning.pytorch.loggers.TensorBoardLogger
+      init_args:
+        # Save path
+        save_dir: log
+        # Sub-path of the save path
+        name: tfsepnet_test
+
+# Path to the checkpoint of trained TF-SepNet
+ckpt_path: log/tfsepnet_train/version_*/checkpoints/***.ckpt
+
+model:
+  class_path: model.lit_asc.LitAcousticSceneClassificationSystem
+  init_args:
+    backbone:
+      class_path: model.backbones.TFSepNet
+      init_args:
+        in_channels: 1
+        num_classes: 10
+        base_channels: 64
+        depth: 17
+    data_augmentation:
+      mix_up: null
+      mix_style: null
+      spec_aug: null
+      dir_aug: null
+    class_label: scene
+    domain_label: device
+    spec_extractor:
+      class_path: util.CpMel
+      init_args:
+        n_mels: 512
+
+data:
+  class_path: data.data_module.DCASEDataModule
+  init_args:
+    meta_dir: data/meta_dcase_2024
+    audio_dir: ../TAU-urban-acoustic-scenes-2022-mobile-development/development
+    batch_size: 256
+    num_workers: 8
+    pin_memory: true
+    sampling_rate: 32000
+    test_subset: test
