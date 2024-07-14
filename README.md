@@ -4,7 +4,7 @@ Author: **Yiqiang Cai** (yiqiang.cai21@student.xjtlu.edu.cn), *Xi'an Jiaotong-Li
 
 ## Task Description
 
-The task 1 of DCASE Challenge focuses on Acoustic Scene Classification (ASC), recognizing the environment in which an audio recording was captured, such as streets, parks, or airports. For a detailed description of the challenge and this task visit the [DCASE website](https://dcase.community/challenge2024/). The main challenges of this task are summarized as below:
+The task 1 of DCASE Challenge focuses on Acoustic Scene Classification (ASC), recognizing the environment in which an audio recording was captured, such as streets, parks, or airports. For a detailed description of the challenge and this task, please visit the [DCASE website](https://dcase.community/challenge2024/). The main challenges of this task are summarized as below:
 1. Domain Shift: Unseen devices exist in test set. (2020~)
 2. Short Duration: The duration of audio recordings reduced from 10s (\~2021) to 1s (2022\~).
 3. Low Complexity: Limited model parameters (128K INT8) and computational overheads (30 MMACs). (2022~)
@@ -15,8 +15,8 @@ The task 1 of DCASE Challenge focuses on Acoustic Scene Classification (ASC), re
 This repository provides an easy way to train your models on the datasets of DCASE task 1.
 
 1. All configuration of model, dataset and training can be done via a simple YAML file.
-2. The training loop is implemented using [PyTorch Lightning](https://lightning.ai/).
-3. Logging is implemented using [TensorBoard](https://pytorch.org/tutorials/recipes/recipes/tensorboard_with_pytorch.html).
+2. Entire system is implemented using [PyTorch Lightning](https://lightning.ai/).
+3. Logging can be implemented using [TensorBoard](https://lightning.ai/docs/pytorch/stable/extensions/generated/lightning.pytorch.loggers.TensorBoardLogger.html#tensorboardlogger) or [Wandb](https://lightning.ai/docs/pytorch/stable/extensions/generated/lightning.pytorch.loggers.WandbLogger.html).
 4. Various task-related techniques have been included.
    * 3 Spectrogram Extractor: [Cnn3Mel](https://dcase-repo.github.io/dcase_util/generated/dcase_util.features.MelExtractor.html?highlight=mel#dcase_util.features.MelExtractor), [CpMel](https://github.com/fschmid56/cpjku_dcase23/tree/main), [BEATsMel](https://github.com/microsoft/unilm/tree/master/beats)
    * 3 High-performing Backbones: [BEATs](https://arxiv.org/pdf/2212.09058), [TF-SepNet](https://ieeexplore.ieee.org/abstract/document/10447999), [BC-ResNet](https://arxiv.org/abs/2106.04140).
