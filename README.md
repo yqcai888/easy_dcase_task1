@@ -154,3 +154,15 @@ class NewAugmentation(_DataAugmentation):
 
 More instructions can be found on [LightningCLI](https://lightning.ai/docs/pytorch/stable/cli/lightning_cli.html)
 
+## Citation
+If you find our code helps, we would appreciate using the following citations:
+```
+@techreport{Cai2024,
+    Author = "Cai, Yiqiang and Lin, Minyu and Li, Shengchen and Shao, Xi",
+    title = "{DCASE2024} Task1 Submission: Data-Efficient Acoustic Scene Classification with Self-Supervised Teachers",
+    institution = "DCASE2024 Challenge",
+    year = "2024",
+    month = "May",
+}
+```
+
