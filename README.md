@@ -77,6 +77,13 @@ python main.py test --config config/tfsepnet_test.yaml --ckpt_path path/to/ckpt
 python main.py validate --config config/tfsepnet_quant.yaml --ckpt_path path/to/ckpt
 ```
 
+9. View results:
+```
+tensorboard --logdir log/tfsepnet_train # Check training results
+tensorboard --logdir log/tfsepnet_test # Check testing results
+```
+Then results will be available at [localhost port 6006](http://127.0.0.1:6006/).
+
 ## Check Available Arguments
 
 The available arguments and documentations can be shown by command line.
