@@ -8,5 +8,5 @@ lightning
 scikit-learn
 timm
 torchinfo
-"lightning[pytorch-extra]"
+lightning[pytorch-extra]
 neural-compressor
