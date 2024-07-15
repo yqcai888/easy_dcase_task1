@@ -11,3 +11,4 @@ torchinfo
 lightning[pytorch-extra]
 neural-compressor
 dcase_util
+tensorboard
