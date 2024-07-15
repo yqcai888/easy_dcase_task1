@@ -14,13 +14,13 @@ The task 1 of DCASE Challenge focuses on Acoustic Scene Classification (ASC), re
 
 This repository provides an easy way to train your models on the datasets of DCASE task 1.
 
-1. All configuration of model, dataset and training can be done via a simple YAML file.
+1. All configurations of model, dataset and training can be done via a simple YAML file.
 2. Entire system is implemented using [PyTorch Lightning](https://lightning.ai/).
-3. Logging can be implemented using [TensorBoard](https://lightning.ai/docs/pytorch/stable/extensions/generated/lightning.pytorch.loggers.TensorBoardLogger.html#tensorboardlogger) or [Wandb](https://lightning.ai/docs/pytorch/stable/extensions/generated/lightning.pytorch.loggers.WandbLogger.html).
+3. Logging is implemented using [TensorBoard](https://lightning.ai/docs/pytorch/stable/extensions/generated/lightning.pytorch.loggers.TensorBoardLogger.html#tensorboardlogger). ([Wandb API](https://lightning.ai/docs/pytorch/stable/extensions/generated/lightning.pytorch.loggers.WandbLogger.html) is also supported.)
 4. Various task-related techniques have been included.
    * 3 Spectrogram Extractor: [Cnn3Mel](https://dcase-repo.github.io/dcase_util/generated/dcase_util.features.MelExtractor.html?highlight=mel#dcase_util.features.MelExtractor), [CpMel](https://github.com/fschmid56/cpjku_dcase23/tree/main), [BEATsMel](https://github.com/microsoft/unilm/tree/master/beats)
    * 3 High-performing Backbones: [BEATs](https://arxiv.org/pdf/2212.09058), [TF-SepNet](https://ieeexplore.ieee.org/abstract/document/10447999), [BC-ResNet](https://arxiv.org/abs/2106.04140).
-   * 4 Plug-and-play Data Augmentation Techniques: [MixUp](https://arxiv.org/abs/1710.09412), [FreqMixStyle](https://dcase.community/documents/workshop2022/proceedings/DCASE2022Workshop_Schmid_27.pdf), [SpecAugmentation](https://arxiv.org/abs/1904.08779), [Device Impulse Response Augmentation](https://arxiv.org/pdf/2305.07499).
+   * 4 Plug-and-played Data Augmentation Techniques: [MixUp](https://arxiv.org/abs/1710.09412), [FreqMixStyle](https://dcase.community/documents/workshop2022/proceedings/DCASE2022Workshop_Schmid_27.pdf), [SpecAugmentation](https://arxiv.org/abs/1904.08779), [Device Impulse Response Augmentation](https://arxiv.org/pdf/2305.07499).
    * 2 Model Compression Methods: [Post-training Quantization](https://lightning.ai/docs/pytorch/stable/advanced/post_training_quantization.html#model-quantization), [Knowledge Distillation](https://github.com/fschmid56/cpjku_dcase23/tree/main).
 
 ## Getting Started
@@ -140,7 +140,7 @@ Deploy your model in model/backbones/ and inherit the _BaseBackbone:
 class YourModel(_BaseBackbone):
 ...
 ```
-Implement new spectrogram extractor in util/spec_extractor/ and inherit the _BaseBackbone:
+Implement new spectrogram extractor in util/spec_extractor/ and inherit the _SpecExtractor:
 ```
 class NewExtractor(_SpecExtractor):
 ...
