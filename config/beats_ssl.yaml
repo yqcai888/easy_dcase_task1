@@ -1,0 +1,96 @@
+### Finetune both encoder and classifier of pretrained BEATs ###
+
+trainer:
+  logger:
+      # Logger to save the logs, configs, hyperparameters and checkpoints
+      class_path: lightning.pytorch.loggers.TensorBoardLogger
+      init_args:
+        # Save path
+        save_dir: log
+        # Sub-path of the save path
+        name: beats_ssl
+  callbacks:
+      # Show epoch instead of step on tensor board
+    - class_path: util.OverrideEpochStepCallback
+      # Monitor learning rate on tensor board
+    - class_path: lightning.pytorch.callbacks.LearningRateMonitor
+      init_args:
+        logging_interval: epoch
+      # Save the best model with highest validation accuracy
+    - class_path: lightning.pytorch.callbacks.ModelCheckpoint
+      init_args:
+        save_top_k: 1
+        monitor: val_acc
+        mode: max
+        filename: '{epoch}-{val_acc:.4f}'
+  # Max training epochs
+  max_epochs: 30
+
+ckpt_path: null
+
+model:
+  class_path: model.lit_asc.LitAscWithWarmupLinearDownScheduler
+  init_args:
+    backbone:
+      class_path: model.backbones.PretrainedBEATs
+      init_args:
+          pretrained: model/beats/checkpoints/BEATs_iter3_plus_AS2M.pt
+          num_classes: 10
+    # Set to ``null`` if not applied
+    data_augmentation:
+      mix_up:
+        class_path: util.MixUp
+        init_args:
+          alpha: 0.3
+      mix_style:
+        class_path: util.FreqMixStyle
+        init_args:
+          alpha: 0.4
+          p: 0.4
+      dir_aug:
+        class_path: util.DeviceImpulseResponseAugmentation
+        init_args:
+          path_ir: ../microphone_impulse_response
+          p: 0.6
+      spec_aug:
+        class_path: util.SpecAugmentation
+        init_args:
+          mask_size: 0.2
+          p: 1.0
+    class_label: scene
+    domain_label: device
+    spec_extractor:
+      class_path: util.BEATsMel
+      init_args:
+        dataset_mean: 15.41663
+        dataset_std: 6.55582
+    # Optimization
+    optimizer:
+      class_path: torch.optim.AdamW
+      init_args:
+        lr: 0.00001
+        betas:
+          - 0.9
+          - 0.98
+        weight_decay: 0.01
+    # Exponentially increase the learning rate as a warmup, then linearly decrease to a minimum rate of peak value.
+    # All credit goes to https://github.com/fschmid56/cpjku_dcase23/blob/main/helpers/lr_schedule.py
+    # Check the documentation for more details in util/lr_scheduler.py
+    warmup_len: 4
+    down_len: 26
+    min_lr: 0.005
+
+data:
+  # Wrapped data module of train, valid, test DataLoaders
+  class_path: data.data_module.DCASEDataModule
+  init_args:
+    # The path to meta files
+    meta_dir: data/meta_dcase_2024
+    # The path to audio files
+    audio_dir: ../TAU-urban-acoustic-scenes-2022-mobile-development/development
+    batch_size: 128
+    num_workers: 8
+    pin_memory: true
+    sampling_rate: 16000
+    train_subset: split5
+

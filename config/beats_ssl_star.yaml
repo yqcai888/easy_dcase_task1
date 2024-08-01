@@ -1,0 +1,78 @@
+### Freeze the encoder of pretrained BEATs, only finetune the classifier ###
+
+trainer:
+  logger:
+      # Logger to save the logs, configs, hyperparameters and checkpoints
+      class_path: lightning.pytorch.loggers.TensorBoardLogger
+      init_args:
+        # Save path
+        save_dir: log
+        # Sub-path of the save path
+        name: beats_ssl_star
+  callbacks:
+      # Show epoch instead of step on tensor board
+    - class_path: util.OverrideEpochStepCallback
+      # Freeze encoder
+    - class_path: util.FreezeEncoderFinetuneClassifier
+      # Monitor learning rate on tensor board
+    - class_path: lightning.pytorch.callbacks.LearningRateMonitor
+      init_args:
+        logging_interval: epoch
+      # Save the best model with highest validation accuracy
+    - class_path: lightning.pytorch.callbacks.ModelCheckpoint
+      init_args:
+        save_top_k: 1
+        monitor: val_acc
+        mode: max
+        filename: '{epoch}-{val_acc:.4f}'
+        save_weights_only: True
+  # Max training epochs
+  max_epochs: 60
+
+ckpt_path: null
+
+model:
+  class_path: model.lit_asc.LitAcousticSceneClassificationSystem
+  init_args:
+    backbone:
+      class_path: model.backbones.PretrainedBEATs
+      init_args:
+          pretrained: model/beats/checkpoints/BEATs_iter3_plus_AS2M.pt
+          num_classes: 10
+    # Set to ``null`` if not applied
+    data_augmentation:
+      mix_up:
+        class_path: util.MixUp
+        init_args:
+          alpha: 0.3
+      mix_style: null
+      dir_aug: null
+      spec_aug:
+        class_path: util.SpecAugmentation
+        init_args:
+          mask_size: 0.2
+          p: 1.0
+    class_label: scene
+    domain_label: device
+    spec_extractor:
+      class_path: util.BEATsMel
+      init_args:
+        dataset_mean: 15.41663
+        dataset_std: 6.55582
+
+data:
+  # Wrapped data module of train, valid, test DataLoaders
+  class_path: data.data_module.DCASEDataModule
+  init_args:
+    # The path to meta files
+    meta_dir: data/meta_dcase_2024
+    # The path to audio files
+    audio_dir: ../TAU-urban-acoustic-scenes-2022-mobile-development/development
+    batch_size: 256
+    num_workers: 4
+    pin_memory: true
+    sampling_rate: 16000
+    train_subset: split5
+
+optimizer:
+  class_path: torch.optim.Adam
