@@ -132,8 +132,7 @@ python main.py predict --config config/beats_predict.yaml
 ```
 
 ## Knowledge Distillation
-Before knowledge distillation, make sure that the logits of teacher model have been generated and placed in your preferred directory. Alternatively, we also provided [logits of pre-trained BEATs](https://github.com/yqcai888/easy_dcase_task1/releases/tag/v0.0.1) for easier implementation. Please download and extract them into log/ when use.  
-Input the path of logits files into config/tfsepnet_kd.yaml. If use more than one logit, the logits will be averaged as teacher ensemble.
+Before knowledge distillation, make sure that the logits of teacher model have been generated and placed in your preferred directory. Alternatively, we also provided [logits of fine-tuned BEATs](https://github.com/yqcai888/easy_dcase_task1/releases/tag/v0.0.1) for easier implementation. Please download and extract them into log/ when use. Input the path of logits files into config/tfsepnet_kd.yaml. If use more than one logit, the logits will be averaged as teacher ensemble.
 
 ```
     logits_files:
