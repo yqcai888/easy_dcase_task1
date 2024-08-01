@@ -72,17 +72,17 @@ python main.py fit --config config/tfsepnet_train.yaml --data.train_subset split
 python main.py test --config config/tfsepnet_test.yaml --ckpt_path path/to/ckpt
 ```
 
-8. Quantize model:
-```
-python main.py validate --config config/tfsepnet_quant.yaml --ckpt_path path/to/ckpt
-```
-
-9. View results:
+8. View results:
 ```
 tensorboard --logdir log/tfsepnet_train # Check training results
 tensorboard --logdir log/tfsepnet_test # Check testing results
 ```
 Then results will be available at [localhost port 6006](http://127.0.0.1:6006/).
+
+9. Quantize model:
+```
+python main.py validate --config config/tfsepnet_quant.yaml --ckpt_path path/to/ckpt
+```
 
 ## Check Available Arguments
 
@@ -110,30 +110,35 @@ python main.py fit --model.help LitAcousticSceneClassificationSystem --model.ini
 ## Fine-tune BEATs for ASC
 For convenience, please download the [checkpoints](https://github.com/microsoft/unilm/tree/master/beats) into the path: model/beats/checkpoints/.
 
-1. Freeze encoder and fine-tune classifier:
+1. Freeze encoder and fine-tune classifier, BEATs (SSL)*:
 ```
-python main.py fit --config config/beats_freeze.yaml
+python main.py fit --config config/beats_ssl_star.yaml
 ```
-2. Unfrozen fine-tuning:
+2. Unfrozen fine-tuning the self-supervised pre-trained BEATs model, BEATs (SSL):
 ```
-python main.py fit --config config/beats_finetune.yaml
+python main.py fit --config config/beats_ssl.yaml
 ```
-3. Test model:
+3. Unfrozen fine-tuning the SSL pre-trained BEATs with additional supervised fine-tuning on AudioSet, BEATs (SSL+SL):
+```
+python main.py fit --config config/beats_ssl+sl.yaml
+```
+4. Test model:
 ```
 python main.py test --config config/beats_test.yaml
 ```
-4. Get predictions from fine-tuned BEATs:
+5. Get predictions from fine-tuned BEATs:
 ```
 python main.py predict --config config/beats_predict.yaml
 ```
 
 ## Knowledge Distillation
-Input the path of logits files into config/tfsepnet_kd.yaml (If use more than one logit, the logits will be averaged as teacher ensemble):
+Input the path of logits files into config/tfsepnet_kd.yaml (If use more than one logit, the logits will be averaged as teacher ensemble).
+We also provided some logits of pre-trained BEATs here for easier implementation. Please download and extract them into log/ when use.
 ```
     logits_files:
-      - log/beats_freeze/version_*/predictions_split*.pt
-      - log/beats_finetune/version_*/predictions_split*.pt
-      - log/beats_finetune/version_*/predictions_split*.pt
+      - log/beats_ssl_star/predictions_split*.pt
+      - log/beats_ssl/predictions_split*.pt
+      - log/beats_ssl+sl/predictions_split*.pt
 ```
 Distilling knowledge from fine-tuned BEATs to TF-SepNet:
 ```
