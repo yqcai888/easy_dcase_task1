@@ -110,15 +110,15 @@ python main.py fit --model.help LitAcousticSceneClassificationSystem --model.ini
 ## Fine-tune BEATs for ASC
 For convenience, please download the [checkpoints](https://github.com/microsoft/unilm/tree/master/beats) into the path: model/beats/checkpoints/.
 
-1. Freeze encoder and fine-tune classifier, BEATs (SSL)*:
+1. Freeze encoder and fine-tune classifier of self-supervised pre-trained BEATs, BEATs (SSL)*:
 ```
 python main.py fit --config config/beats_ssl_star.yaml
 ```
-2. Unfrozen fine-tuning the self-supervised pre-trained BEATs model, BEATs (SSL):
+2. Unfrozen fine-tune the self-supervised pre-trained BEATs, BEATs (SSL):
 ```
 python main.py fit --config config/beats_ssl.yaml
 ```
-3. Unfrozen fine-tuning the SSL pre-trained BEATs with additional supervised fine-tuning on AudioSet, BEATs (SSL+SL):
+3. Unfrozen fine-tune the self-supervised pre-trained BEATs with additional supervised fine-tuning on AudioSet, BEATs (SSL+SL):
 ```
 python main.py fit --config config/beats_ssl+sl.yaml
 ```
@@ -132,8 +132,9 @@ python main.py predict --config config/beats_predict.yaml
 ```
 
 ## Knowledge Distillation
+Before knowledge distillation, make sure that the logits of teacher model have been generated. Alternatively, we also provided [logits of pre-trained BEATs](https://github.com/yqcai888/easy_dcase_task1/releases/tag/v0.0.1) for easier implementation. Please download and extract them into log/ when use.  
 Input the path of logits files into config/tfsepnet_kd.yaml (If use more than one logit, the logits will be averaged as teacher ensemble).
-We also provided some logits of pre-trained BEATs here for easier implementation. Please download and extract them into log/ when use.
+
 ```
     logits_files:
       - log/beats_ssl_star/predictions_split*.pt
