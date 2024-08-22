@@ -127,7 +127,7 @@ class DCASEDataModule(L.LightningDataModule):
         if stage == "fit":
             # Add teacher logits to the dataset if using knowledge distillation
             if self.logits_files is not None:
-                self.train_set = AudioLabelsDatasetWithLogits(logit_files=self.logits_files, meta_dir=self.meta_dir, audio_dir=self.audio_dir, subset=self.train_subset, **self.kwargs)
+                self.train_set = AudioLabelsDatasetWithLogits(logits_files=self.logits_files, meta_dir=self.meta_dir, audio_dir=self.audio_dir, subset=self.train_subset, **self.kwargs)
             else:
                 self.train_set = AudioLabelsDataset(self.meta_dir, self.audio_dir, subset=self.train_subset, **self.kwargs)
             self.valid_set = AudioLabelsDataset(self.meta_dir, self.audio_dir, subset="valid", **self.kwargs)
