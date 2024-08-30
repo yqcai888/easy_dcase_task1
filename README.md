@@ -167,14 +167,13 @@ class NewAugmentation(_DataAugmentation):
 More instructions can be found on [LightningCLI](https://lightning.ai/docs/pytorch/stable/cli/lightning_cli.html)
 
 ## Citation
-If you find our code helps, we would appreciate using the following citations:
+If you find our code helps, we would appreciate using the following citation:
 ```
-@techreport{Cai2024,
-    Author = "Cai, Yiqiang and Lin, Minyu and Li, Shengchen and Shao, Xi",
-    title = "{DCASE2024} Task1 Submission: Data-Efficient Acoustic Scene Classification with Self-Supervised Teachers",
-    institution = "DCASE2024 Challenge",
-    year = "2024",
-    month = "May",
+@article{cai2024leveraging,
+  title={Leveraging Self-supervised Audio Representations for Data-Efficient Acoustic Scene Classification},
+  author={Cai, Yiqiang and Li, Shengchen and Shao, Xi},
+  journal={arXiv preprint arXiv:2408.14862},
+  year={2024}
 }
 ```
 
