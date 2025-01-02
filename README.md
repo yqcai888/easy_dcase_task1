@@ -12,7 +12,7 @@ The task 1 of DCASE Challenge focuses on Acoustic Scene Classification (ASC), re
 
 ## System Description
 
-This repository provides an easy way to train your models on the datasets of DCASE task 1. The paper describing this system has been accepted by DCASE Workshop 2024 and available [here](https://arxiv.org/abs/2408.14862).
+This repository provides an easy way to train your models on the datasets of DCASE task 1. This system won the **Judges' Award** for DCASE2024 Challenge Task1. Corresponding paper has been accepted by DCASE Workshop 2024 and available [here](https://arxiv.org/abs/2408.14862).
 
 1. All configurations of model, dataset and training can be done via a simple YAML file.
 2. Entire system is implemented using [PyTorch Lightning](https://lightning.ai/).
@@ -169,11 +169,13 @@ More instructions can be found on [LightningCLI](https://lightning.ai/docs/pytor
 ## Citation
 If you find our code helps, we would appreciate using the following citation:
 ```
-@article{cai2024leveraging,
-  title={Leveraging Self-supervised Audio Representations for Data-Efficient Acoustic Scene Classification},
-  author={Cai, Yiqiang and Li, Shengchen and Shao, Xi},
-  journal={arXiv preprint arXiv:2408.14862},
-  year={2024}
+@inproceedings{Cai2024workshop,
+    author = "Cai, Yiqiang and Li, Shengchen and Shao, Xi",
+    title = "Leveraging Self-Supervised Audio Representations for Data-Efficient Acoustic Scene Classification",
+    booktitle = "Proceedings of the Detection and Classification of Acoustic Scenes and Events 2024 Workshop (DCASE2024)",
+    month = "October",
+    year = "2024",
+    pages = "21--25",
 }
 ```
 
