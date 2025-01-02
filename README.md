@@ -12,7 +12,7 @@ The task 1 of DCASE Challenge focuses on Acoustic Scene Classification (ASC), re
 
 ## System Description
 
-This repository provides an easy way to train your models on the datasets of DCASE task 1. This system won the **Judges' Award** for DCASE2024 Challenge Task1. Corresponding paper has been accepted by DCASE Workshop 2024 and available [here](https://arxiv.org/abs/2408.14862).
+This repository provides an easy way to train your models on the datasets of DCASE task 1. The example system (TF-SepNet + BEATs teacher) won the **Judges' Award** for DCASE2024 Challenge Task1. Corresponding paper has been accepted by DCASE Workshop 2024 and available [here](https://arxiv.org/abs/2408.14862).
 
 1. All configurations of model, dataset and training can be done via a simple YAML file.
 2. Entire system is implemented using [PyTorch Lightning](https://lightning.ai/).
