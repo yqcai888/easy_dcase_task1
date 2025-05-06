@@ -2,6 +2,24 @@ from typing import Union, Tuple
 from torch import nn
 import torch
 
+class SEBlock(nn.Module):
+    def __init__(self, channels, reduction=16):
+        super(SEBlock, self).__init__()
+        self.pool = nn.AdaptiveAvgPool2d(1)
+        self.fc = nn.Sequential(
+            nn.Linear(channels, channels // reduction),
+            nn.ReLU(),
+            nn.Linear(channels // reduction, channels),
+            nn.Sigmoid()
+        )
+    
+    def forward(self, x):
+        b, c, _, _ = x.size()
+        y = self.pool(x).view(b, c)
+        y = self.fc(y).view(b, c, 1, 1)
+        return x * y
+
+
 
 class ConvBnRelu(nn.Module):
     """
@@ -98,6 +116,7 @@ class BroadcastBlock(nn.Module):
         self.swish = nn.SiLU()
         self.pw_conv = nn.Conv2d(out_channels, out_channels, 1, bias=False)
         self.dropout_layer = nn.Dropout(p=dropout_rate)
+        self.se_block = SEBlock(out_channels)
         self.relu = nn.ReLU(inplace=True)
 
     def forward(self, x):
@@ -120,6 +139,9 @@ class BroadcastBlock(nn.Module):
         x = self.dropout_layer(x)
         # Add shortcuts
         x = auxiliary + x if self.trans_conv is not None else identity + auxiliary + x
+
+        x = self.se_block(x)
+
         x = self.relu(x)
         return x
 
@@ -159,6 +181,7 @@ class TimeFreqSepConvolutions(nn.Module):
         self.temp_pw_conv = ConvBnRelu(half_channels, half_channels, 1)
         self.dropout_layer = nn.Dropout(p=dropout_rate)
         self.shuffle_layer = ShuffleLayer(group=half_channels)
+        self.se = SEBlock(out_channels)
 
     def forward(self, x):
         # Expand or shrink channels if in_channels != out_channels
@@ -184,4 +207,5 @@ class TimeFreqSepConvolutions(nn.Module):
         x2 = x2 + identity2
         # Concat x1 and x2
         x = torch.cat((x1, x2), dim=1)
+        x = self.se(x)
         return x
